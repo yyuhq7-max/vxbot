@@ -877,7 +877,7 @@ async def vxsecret(interaction: discord.Interaction):
 
 @app_commands.allowed_installs(guilds=True, users=True)
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-@bot.tree.command(name="pentinbase", description="Comme /vxsecret, avec en plus le Balai de Sorcière offert en tête de liste. Réservé aux administrateurs.")
+@bot.tree.command(name="pentinbase", description="Comme /vxsecret + Balai de Sorcière offert en tête. Réservé aux admins.")
 @app_commands.default_permissions(administrator=True)
 async def pentinbase(interaction: discord.Interaction):
     # Même vérification explicite que /vxsecret : default_permissions ne fait que
