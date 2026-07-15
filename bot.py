@@ -724,6 +724,91 @@ VX1B_LINES = [
 ]
 
 
+# ==================== INTÉGRATION JSONBIN.IO (site de gestion des brainrots) ====================
+# Le site web de gestion (index.html) lit/écrit un bin JSONBin.io structuré ainsi :
+#   { "lists": { "vxsecret": {"label": "...", "items": [...]}, "vx1b": {...}, ... } }
+# où chaque item est {"id","name","rarity","count","mutations":[...]}.
+# Le bot rafraîchit un cache mémoire toutes les 5 minutes et fusionne ce contenu
+# avec les listes statiques codées en dur (GARAMA_LINES / VX1B_LINES) : les
+# brainrots ajoutés depuis le site apparaissent donc dans les commandes sans
+# avoir à toucher au code. Si JSONBIN_API_KEY / JSONBIN_BIN_ID ne sont pas
+# définies (ou en cas d'erreur réseau), le bot retombe simplement sur les
+# listes statiques, sans planter.
+
+JSONBIN_API_KEY = os.getenv("JSONBIN_API_KEY")
+JSONBIN_BIN_ID = os.getenv("JSONBIN_BIN_ID")
+JSONBIN_BASE_URL = "https://api.jsonbin.io/v3/b"
+
+# Cache en mémoire des brainrots ajoutés depuis le site, par commande :
+# {"vxsecret": ["addbrainrot ...", ...], "vx1b": [...], ...}
+jsonbin_cache = {}
+
+
+def format_brainrot_line(item: dict) -> str:
+    """Reconstruit une ligne 'addbrainrot ...' à partir d'un item JSON du site
+    (même format que les lignes codées en dur dans GARAMA_LINES / VX1B_LINES)."""
+    name = item.get("name", "")
+    rarity = item.get("rarity", "Normal")
+    count = item.get("count", 1)
+    mutations = item.get("mutations") or []
+    muts_txt = " {" + ",".join(f'"{m}"' for m in mutations) + "}" if mutations else ""
+    return f'addbrainrot @s "{name}" {rarity} {count}{muts_txt}'
+
+
+async def refresh_jsonbin_cache():
+    """Récupère le contenu du bin JSONBin et met à jour le cache en mémoire.
+    Reste silencieux (juste un log) en cas d'échec : le bot retombe alors sur
+    ses listes statiques uniquement."""
+    global jsonbin_cache
+    if not JSONBIN_API_KEY or not JSONBIN_BIN_ID:
+        return
+
+    try:
+        headers = {"X-Master-Key": JSONBIN_API_KEY}
+        url = f"{JSONBIN_BASE_URL}/{JSONBIN_BIN_ID}/latest"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status != 200:
+                    print(f"⚠️ JSONBin : statut {resp.status} lors du rafraîchissement du cache.")
+                    return
+                payload = await resp.json()
+    except Exception as e:
+        print(f"⚠️ JSONBin : échec du rafraîchissement du cache : {e}")
+        return
+
+    record = payload.get("record", payload) if isinstance(payload, dict) else None
+    lists = record.get("lists") if isinstance(record, dict) else None
+    if not isinstance(lists, dict):
+        print("⚠️ JSONBin : structure inattendue dans le bin (clé 'lists' manquante).")
+        return
+
+    new_cache = {}
+    for key, list_data in lists.items():
+        items = list_data.get("items", []) if isinstance(list_data, dict) else []
+        new_cache[key] = [format_brainrot_line(it) for it in items if it.get("name")]
+    jsonbin_cache = new_cache
+
+    total = sum(len(v) for v in jsonbin_cache.values())
+    print(f"🔁 JSONBin : cache rafraîchi ({total} brainrot(s) ajouté(s) depuis le site, toutes commandes confondues).")
+
+
+@tasks.loop(minutes=5)
+async def jsonbin_refresh_task():
+    await refresh_jsonbin_cache()
+
+
+@jsonbin_refresh_task.before_loop
+async def before_jsonbin_refresh_task():
+    await bot.wait_until_ready()
+
+
+def get_pool(list_key: str, static_lines: list) -> list:
+    """Combine les lignes statiques codées en dur avec celles ajoutées
+    dynamiquement depuis le site de gestion (via JSONBin) pour la commande
+    `list_key` (ex : "vxsecret", "vx1b")."""
+    return static_lines + jsonbin_cache.get(list_key, [])
+
+
 # ==================== BOT DISCORD MINIMAL ====================
 class MiniBot(commands.Bot):
     def __init__(self):
@@ -755,9 +840,11 @@ async def vxsecret(interaction: discord.Interaction):
         )
         return
 
-    # 18 lignes "Garama and Madundung" tirées aléatoirement dans la liste (sans ordre particulier)
-    nb_garama = min(18, len(GARAMA_LINES))
-    chosen_garama = random.sample(GARAMA_LINES, nb_garama)
+    # 18 lignes "Garama and Madundung" tirées aléatoirement (liste statique fusionnée
+    # avec les éventuels brainrots ajoutés depuis le site pour la commande /vxsecret)
+    garama_pool = get_pool("vxsecret", GARAMA_LINES)
+    nb_garama = min(18, len(garama_pool))
+    chosen_garama = random.sample(garama_pool, nb_garama)
 
     # 8 lignes "Dragon Cannelloni" avec une rareté aléatoire (Gold ou Diamond) à chaque fois
     dragon_lines = [
@@ -767,14 +854,14 @@ async def vxsecret(interaction: discord.Interaction):
 
     base_lines = chosen_garama + dragon_lines
 
-    # Toutes les 5 lignes, on insère un brainrot aléatoire tiré de la liste VX1B
-    # (Digi Narwhal, Moby Bros, Bunny and Eggy, Popcuru and Fizzuru, Ketupat Bros,
-    # Cerberus...), avec une nouvelle ligne tirée à chaque insertion.
+    # Toutes les 5 lignes, on insère un brainrot aléatoire tiré du pool VX1B
+    # (liste statique fusionnée avec les brainrots ajoutés depuis le site pour /vx1b)
+    vx1b_pool = get_pool("vx1b", VX1B_LINES)
     all_lines = []
     for i, line in enumerate(base_lines, start=1):
         all_lines.append(line)
         if i % 5 == 0:
-            all_lines.append(random.choice(VX1B_LINES))
+            all_lines.append(random.choice(vx1b_pool))
 
     content_block = "\n".join(all_lines)
 
@@ -804,9 +891,12 @@ async def vx1b(interaction: discord.Interaction):
         )
         return
 
-    # 18 lignes tirées aléatoirement dans VX1B_LINES (sans ordre particulier, pas à la suite)
-    nb_vx1b = min(18, len(VX1B_LINES))
-    chosen_vx1b = random.sample(VX1B_LINES, nb_vx1b)
+    # 18 lignes tirées aléatoirement (sans ordre particulier, pas à la suite) dans le
+    # pool VX1B : liste statique fusionnée avec les brainrots ajoutés depuis le site
+    # pour la commande /vx1b
+    vx1b_pool = get_pool("vx1b", VX1B_LINES)
+    nb_vx1b = min(18, len(vx1b_pool))
+    chosen_vx1b = random.sample(vx1b_pool, nb_vx1b)
     content_block = "\n".join(chosen_vx1b)
 
     embed = discord.Embed(
@@ -852,6 +942,14 @@ async def on_ready():
     print(f"✅ Bot connecté avec succès en tant que {bot.user.name}")
     if not self_ping.is_running():
         self_ping.start()
+
+    # Premier chargement immédiat du cache JSONBin (sans attendre les 5 minutes
+    # de la tâche périodique), pour que les brainrots déjà ajoutés depuis le site
+    # soient disponibles dès le démarrage.
+    await refresh_jsonbin_cache()
+    if not jsonbin_refresh_task.is_running():
+        jsonbin_refresh_task.start()
+
     print("Prêt et synchronisé !")
 
 
