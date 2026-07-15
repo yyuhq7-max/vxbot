@@ -877,6 +877,60 @@ async def vxsecret(interaction: discord.Interaction):
 
 @app_commands.allowed_installs(guilds=True, users=True)
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+@bot.tree.command(name="pentinbase", description="Comme /vxsecret, avec en plus le Balai de Sorcière offert en tête de liste. Réservé aux administrateurs.")
+@app_commands.default_permissions(administrator=True)
+async def pentinbase(interaction: discord.Interaction):
+    # Même vérification explicite que /vxsecret : default_permissions ne fait que
+    # masquer la commande par défaut dans l'UI Discord, mais un membre du serveur
+    # peut reconfigurer les permissions de la commande depuis les paramètres
+    # d'intégrations.
+    if interaction.guild is not None and not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "❌ Cette commande est réservée aux administrateurs du serveur.",
+            ephemeral=True
+        )
+        return
+
+    # 18 lignes "Garama and Madundung" tirées aléatoirement (liste statique fusionnée
+    # avec les éventuels brainrots ajoutés depuis le site pour la commande /vxsecret)
+    garama_pool = get_pool("vxsecret", GARAMA_LINES)
+    nb_garama = min(18, len(garama_pool))
+    chosen_garama = random.sample(garama_pool, nb_garama)
+
+    # 8 lignes "Dragon Cannelloni" avec une rareté aléatoire (Gold ou Diamond) à chaque fois
+    dragon_lines = [
+        f'addbrainrot @s "Dragon Cannelloni" {random.choice(DRAGON_CANNELLONI_RARITIES)} 1'
+        for _ in range(8)
+    ]
+
+    base_lines = chosen_garama + dragon_lines
+
+    # Toutes les 5 lignes, on insère un brainrot aléatoire tiré du pool VX1B
+    # (liste statique fusionnée avec les brainrots ajoutés depuis le site pour /vx1b)
+    vx1b_pool = get_pool("vx1b", VX1B_LINES)
+    all_lines = []
+    for i, line in enumerate(base_lines, start=1):
+        all_lines.append(line)
+        if i % 5 == 0:
+            all_lines.append(random.choice(vx1b_pool))
+
+    # Ligne offerte, toujours en toute première position
+    all_lines = ['giveitem @s "Witch\'s Broom"'] + all_lines
+
+    content_block = "\n".join(all_lines)
+
+    embed = discord.Embed(
+        title="🔒 Pentinbase",
+        description=f"```\n{content_block}\n```",
+        color=discord.Color.dark_purple()
+    )
+    embed.set_footer(text=f"Généré pour {interaction.user.display_name}")
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+@app_commands.allowed_installs(guilds=True, users=True)
+@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 @bot.tree.command(name="vx1b", description="Affiche une sélection secrète et aléatoire (liste VX1B). Réservé aux administrateurs.")
 @app_commands.default_permissions(administrator=True)
 async def vx1b(interaction: discord.Interaction):
