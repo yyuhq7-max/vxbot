@@ -909,6 +909,61 @@ async def vx1b(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
+# ==================== COMMANDE GÉNÉRIQUE /vxlist ====================
+# Toute nouvelle "commande" créée depuis le site de gestion (autre que vxsecret
+# et vx1b, qui ont leur propre commande dédiée ci-dessus) est automatiquement
+# jouable via /vxlist, sans avoir besoin de modifier le code du bot à chaque
+# création de liste. Le nom de la liste est proposé par autocomplétion à
+# partir du cache JSONBin.
+
+async def vxlist_name_autocomplete(interaction: discord.Interaction, current: str):
+    choices = []
+    for key in jsonbin_cache.keys():
+        if key in ("vxsecret", "vx1b"):
+            continue  # ces deux-là ont déjà leur propre commande dédiée
+        if current.lower() in key.lower():
+            choices.append(app_commands.Choice(name=f"/{key}", value=key))
+    return choices[:25]
+
+
+@app_commands.allowed_installs(guilds=True, users=True)
+@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+@bot.tree.command(name="vxlist", description="Tire aléatoirement des brainrots depuis une liste créée sur le site. Réservé aux administrateurs.")
+@app_commands.describe(liste="Nom de la liste créée depuis le site de gestion")
+@app_commands.autocomplete(liste=vxlist_name_autocomplete)
+@app_commands.default_permissions(administrator=True)
+async def vxlist(interaction: discord.Interaction, liste: str):
+    if interaction.guild is not None and not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "❌ Cette commande est réservée aux administrateurs du serveur.",
+            ephemeral=True
+        )
+        return
+
+    pool = jsonbin_cache.get(liste, [])
+    if not pool:
+        await interaction.response.send_message(
+            f"❌ Aucun brainrot trouvé pour la liste « {liste} ». Vérifie qu'elle existe bien sur le "
+            "site, qu'elle contient au moins une entrée, et que les modifications ont été enregistrées "
+            "(le bot rafraîchit son cache toutes les 5 minutes).",
+            ephemeral=True
+        )
+        return
+
+    nb = min(18, len(pool))
+    chosen = random.sample(pool, nb)
+    content_block = "\n".join(chosen)
+
+    embed = discord.Embed(
+        title=f"🔒 {liste}",
+        description=f"```\n{content_block}\n```",
+        color=discord.Color.dark_purple()
+    )
+    embed.set_footer(text=f"Généré pour {interaction.user.display_name}")
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
 # ==================== SYSTÈME ANTI-VEILLE POUR RENDER (Free Web Service) ====================
 # Render met en veille les Web Services gratuits après ~15 minutes sans requête
 # HTTP entrante. On contourne ça de deux façons complémentaires :
