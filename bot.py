@@ -519,6 +519,211 @@ GARAMA_LINES = [
 DRAGON_CANNELLONI_RARITIES = ["Gold", "Diamond"]
 
 
+# ==================== LISTE VX1B (Digi Narwhal, Moby Bros, etc.) ====================
+VX1B_LINES = [
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Shark Fin","Sombrero",":3","Matteo Hat","Fire"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Fire",":3","Matteo Hat","Shark Fin","Spider","Sombrero"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Explosive","Shark Fin","Sombrero","Spider"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Matteo Hat","Spider",":3","Explosive","Sombrero","Fire","Shark Fin"}',
+    'addbrainrot @s "Digi Narwhal" Diamond 1 {"Matteo Hat","Explosive","Spider","Shark Fin"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Spider","Sombrero","Matteo Hat"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Matteo Hat","Orange Egg","Fire","Explosive","Shark Fin"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Fire",":3","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Fire","Sombrero","Matteo Hat"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Gold 1 {"Shark Fin",":3","Fire","Matteo Hat","Sombrero"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Sombrero","Shark Fin","Spider"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Diamond 1 {"Matteo Hat","Explosive","Fire","Spider","Shark Fin",":3"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {":3","Explosive","Matteo Hat"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {"Fire","Spider","Sombrero","Shark Fin","Explosive",":3","Matteo Hat"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Fire","Shark Fin","Explosive","Matteo Hat","Sombrero",":3","Spider"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Spider",":3","Fire","Explosive","Matteo Hat"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {"Explosive","Fire","Spider",":3"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Diamond 1 {"Fire","Shark Fin","Sombrero",":3"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Explosive","Spider","Matteo Hat","Fire","Shark Fin","Sombrero",":3"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Spider","Sombrero","Matteo Hat","Fire","Shark Fin"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Sombrero","Matteo Hat","Spider","Shark Fin","Explosive","Fire",":3"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Shark Fin",":3","Fire","Matteo Hat"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Sombrero","Spider","Explosive",":3"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {":3","Shark Fin","Matteo Hat","Sombrero","Spider"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {":3","Matteo Hat","Fire","Explosive","Shark Fin"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {"Shark Fin","Explosive",":3"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {":3","Explosive","Sombrero"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Spider","Explosive","Matteo Hat","Sombrero","Shark Fin",":3"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {":3","Shark Fin","Orange Egg","Sombrero","Explosive","Matteo Hat"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Shark Fin","Explosive","Matteo Hat"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Explosive","Sombrero","Matteo Hat",":3"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Gold 1 {"Spider",":3","Fire"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Spider","Fire",":3","Sombrero","Shark Fin"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Matteo Hat","Sombrero",":3","Shark Fin"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Sombrero","Fire","Matteo Hat","Explosive"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Sombrero","Shark Fin",":3","Matteo Hat","Spider","Fire"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Diamond 1 {"Sombrero","Spider","Shark Fin","Matteo Hat","Fire"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Matteo Hat","Explosive",":3","Orange Egg"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Fire","Sombrero","Shark Fin"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Explosive",":3","Spider","Shark Fin"}',
+    'addbrainrot @s "Digi Narwhal" Diamond 1 {"Matteo Hat","Shark Fin","Explosive","Spider",":3","Sombrero","Fire"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {"Matteo Hat",":3","Explosive","Shark Fin","Fire","Spider","Sombrero"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Explosive","Spider","Sombrero","Fire"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {":3","Sombrero","Shark Fin","Fire","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Orange Egg","Matteo Hat","Shark Fin"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Fire",":3","Matteo Hat","Sombrero","Explosive"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Shark Fin","Spider","Sombrero",":3"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Explosive","Sombrero","Fire"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Fire","Explosive","Spider","Sombrero"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Sombrero","Matteo Hat","Explosive",":3","Spider"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Shark Fin","Matteo Hat","Explosive",":3","Fire","Sombrero","Spider"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Gold 1 {":3","Explosive","Spider","Fire","Sombrero","Shark Fin","Matteo Hat"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {"Sombrero","Spider","Matteo Hat"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Sombrero","Matteo Hat","Fire"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Explosive",":3","Fire","Shark Fin"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {":3","Matteo Hat","Explosive","Sombrero","Fire","Spider","Shark Fin"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Orange Egg","Matteo Hat","Explosive","Sombrero","Shark Fin"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {"Shark Fin","Fire","Matteo Hat","Explosive","Sombrero",":3","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Sombrero","Spider","Explosive","Matteo Hat"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Sombrero","Explosive","Fire","Orange Egg","Shark Fin"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Explosive","Matteo Hat",":3","Shark Fin","Fire","Sombrero"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Sombrero","Explosive",":3","Shark Fin","Spider"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Gold 1 {"Shark Fin",":3","Sombrero","Fire","Spider","Matteo Hat","Explosive"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {":3","Spider","Matteo Hat","Sombrero","Fire"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Gold 1 {"Sombrero","Spider","Matteo Hat",":3","Explosive","Shark Fin","Fire"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Matteo Hat",":3","Spider"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Matteo Hat","Sombrero","Explosive",":3","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Spider","Explosive","Orange Egg","Matteo Hat","Sombrero","Shark Fin",":3"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Shark Fin","Matteo Hat","Sombrero",":3","Spider"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {":3","Explosive","Spider","Fire","Sombrero"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {":3","Sombrero","Matteo Hat","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Spider","Matteo Hat","Sombrero","Shark Fin",":3","Fire"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Shark Fin","Sombrero","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Fire","Sombrero","Matteo Hat","Explosive","Orange Egg"}',
+    'addbrainrot @s "Digi Narwhal" Diamond 1 {"Spider","Explosive","Shark Fin","Sombrero"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Spider",":3","Shark Fin","Sombrero","Explosive","Matteo Hat","Fire"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {":3","Shark Fin","Spider","Sombrero","Explosive"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Sombrero","Spider","Fire"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Fire","Shark Fin","Explosive"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Spider","Fire","Sombrero"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Shark Fin","Spider","Fire","Matteo Hat","Explosive"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {"Sombrero","Shark Fin","Explosive","Fire","Spider","Matteo Hat"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Diamond 1 {":3","Fire","Sombrero","Shark Fin"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Spider","Matteo Hat","Orange Egg","Fire","Explosive"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Explosive",":3","Sombrero"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Sombrero","Shark Fin","Fire",":3","Explosive","Matteo Hat"}',
+    'addbrainrot @s "Digi Narwhal" Diamond 1 {"Spider","Sombrero","Shark Fin","Matteo Hat","Explosive"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {":3","Matteo Hat","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Spider","Fire","Explosive"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Sombrero","Fire",":3","Matteo Hat","Shark Fin","Explosive"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Matteo Hat","Spider","Shark Fin","Explosive","Fire","Orange Egg"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {"Matteo Hat","Fire",":3","Explosive","Sombrero","Shark Fin"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Shark Fin","Sombrero","Fire",":3","Matteo Hat"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Spider","Fire","Matteo Hat","Explosive","Sombrero",":3","Shark Fin"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {"Sombrero","Fire",":3","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {":3","Sombrero","Fire","Matteo Hat","Explosive","Orange Egg"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Matteo Hat","Sombrero","Fire",":3","Explosive","Shark Fin","Orange Egg"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Fire",":3","Explosive","Shark Fin","Sombrero","Spider","Matteo Hat"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Matteo Hat","Spider","Sombrero",":3","Fire"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Divine 1 {"Matteo Hat","Explosive","Spider","Fire","Shark Fin"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Sombrero",":3","Spider","Shark Fin","Matteo Hat","Fire","Explosive"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Sombrero",":3","Matteo Hat"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {":3","Explosive","Matteo Hat","Spider"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Shark Fin","Fire","Spider","Sombrero","Explosive"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Fire",":3","Sombrero","Matteo Hat"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Orange Egg","Matteo Hat",":3","Explosive","Sombrero","Spider","Fire"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Spider","Shark Fin","Sombrero","Explosive",":3","Matteo Hat"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Shark Fin","Sombrero","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {":3","Matteo Hat","Explosive","Shark Fin","Spider","Fire","Sombrero"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Shark Fin","Explosive",":3"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {"Fire","Sombrero","Shark Fin","Matteo Hat",":3","Explosive"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Sombrero","Shark Fin",":3","Fire","Matteo Hat"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Divine 1 {"Spider","Matteo Hat","Sombrero",":3","Shark Fin","Explosive","Fire"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Gold 1 {"Spider","Matteo Hat","Shark Fin",":3","Explosive"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {"Spider","Explosive","Fire","Sombrero","Matteo Hat",":3"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {":3","Explosive","Shark Fin","Sombrero","Fire"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Fire","Spider","Sombrero","Explosive"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Shark Fin","Spider",":3","Sombrero"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {"Sombrero","Shark Fin","Matteo Hat","Spider","Fire",":3"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Sombrero","Explosive","Spider","Shark Fin",":3","Matteo Hat"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Matteo Hat","Spider",":3","Sombrero"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {"Shark Fin",":3","Matteo Hat"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Shark Fin","Spider","Matteo Hat",":3"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Sombrero","Explosive","Fire"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Diamond 1 {"Explosive","Fire",":3"}',
+    'addbrainrot @s "Digi Narwhal" Diamond 1 {"Sombrero","Matteo Hat",":3","Spider","Explosive","Shark Fin","Fire"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Spider","Fire","Sombrero"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Shark Fin","Spider","Fire",":3","Explosive","Sombrero"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Matteo Hat","Spider","Sombrero","Fire","Shark Fin","Explosive"}',
+    'addbrainrot @s "Digi Narwhal" Diamond 1 {"Matteo Hat","Sombrero","Spider","Shark Fin",":3","Fire","Explosive"}',
+    'addbrainrot @s "Bunny and Eggy" Normal 1 {"Spider","Matteo Hat","Sombrero","Fire","Explosive","Shark Fin",":3"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Shark Fin",":3","Fire"}',
+    'addbrainrot @s "Cerberus" Diamond 1 {"Fire","Shark Fin","Spider"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Shark Fin","Matteo Hat","Sombrero"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Sombrero","Explosive","Matteo Hat","Spider","Fire","Shark Fin",":3"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Gold 1 {"Matteo Hat","Sombrero","Fire"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Spider",":3","Sombrero","Explosive","Matteo Hat","Shark Fin"}',
+    'addbrainrot @s "Digi Narwhal" Normal 1 {"Shark Fin","Explosive","Fire","Matteo Hat","Sombrero"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Matteo Hat",":3","Spider","Fire","Shark Fin"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Fire","Matteo Hat",":3","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Gold 1 {"Shark Fin","Explosive","Spider","Orange Egg",":3","Matteo Hat","Fire"}',
+    'addbrainrot @s "Ketupat Bros" Diamond 1 {":3","Matteo Hat","Sombrero","Fire"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Sombrero","Matteo Hat","Spider",":3","Explosive"}',
+    'addbrainrot @s "Digi Narwhal" Gold 1 {"Sombrero","Shark Fin","Fire","Explosive","Matteo Hat",":3"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Explosive","Shark Fin",":3","Spider"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Sombrero","Shark Fin","Explosive",":3"}',
+    'addbrainrot @s "Cerberus" Normal 1 {":3","Shark Fin","Explosive","Matteo Hat","Sombrero","Spider"}',
+    'addbrainrot @s "Ketupat Bros" Gold 1 {"Matteo Hat","Fire","Sombrero","Explosive",":3","Shark Fin","Spider"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Sombrero","Shark Fin",":3","Fire","Explosive","Spider"}',
+    'addbrainrot @s "Bunny and Eggy" Diamond 1 {"Matteo Hat",":3","Spider"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"UFO","Galactic","Spider","Explosive","Sombrero","Fire"}',
+    'addbrainrot @s "Cerberus" Cursed 1 {"Bubblegum","Brazil","Claws","Chocolate","UFO","Explosive"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Chocolate","Galactic","Bubblegum","Brazil","UFO","Claws","Explosive"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Chocolate","Claws","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Brazil","Bubblegum","Sombrero","Spider"}',
+    'addbrainrot @s "Cerberus" Cyber 1 {"UFO","Claws","Brazil","Galactic"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Brazil","Galactic","Bubblegum","Explosive"}',
+    'addbrainrot @s "Cerberus" Diamond 1 {"Galactic","Matteo Hat","Sombrero","Fire","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Cyber 1 {"UFO","Galactic","Claws","Explosive","Fire","Spider"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Chocolate","Bubblegum","Claws","Galactic"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Claws","Brazil","Sombrero","Explosive","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Galactic","UFO","Chocolate","Spider","Sombrero","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"UFO","Claws","Bubblegum","Chocolate","Galactic","Brazil","Explosive"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Galactic","Brazil","UFO","Fire"}',
+    'addbrainrot @s "Cerberus" Diamond 1 {"Galactic","Brazil","Bubblegum","Shark Fin","Sombrero","Fire","Spider"}',
+    'addbrainrot @s "Cerberus" Diamond 1 {"Bubblegum","UFO","Sombrero"}',
+    'addbrainrot @s "Cerberus" Diamond 1 {"Brazil","Claws","Bubblegum"}',
+    'addbrainrot @s "Cerberus" Cyber 1 {"Galactic","Matteo Hat","Explosive",":3","Sombrero","Shark Fin","Spider"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Claws","Brazil","UFO"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Brazil","Galactic","Chocolate","Claws"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Claws","Chocolate","Brazil","UFO"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"UFO","Brazil","Chocolate","Shark Fin",":3"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Galactic","Chocolate","Explosive","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Claws","Spider",":3"}',
+    'addbrainrot @s "Cerberus" Cursed 1 {"Brazil","Claws","Galactic","Chocolate","Matteo Hat","Explosive"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Galactic","Brazil","Bubblegum"}',
+    'addbrainrot @s "Cerberus" Diamond 1 {"Bubblegum","Galactic","Spider","Matteo Hat","Sombrero","Explosive","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Bubblegum","Galactic","Brazil","Chocolate","Spider","Sombrero","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Chocolate","UFO","Claws","Bubblegum","Explosive"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Galactic","Explosive",":3","Matteo Hat","Spider"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Galactic","Bubblegum","UFO","Explosive"}',
+    'addbrainrot @s "Cerberus" Cyber 1 {"Brazil","Spider",":3","Sombrero"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"UFO","Sombrero","Spider"}',
+    'addbrainrot @s "Cerberus" Diamond 1 {"UFO","Bubblegum","Galactic","Fire","Explosive","Matteo Hat","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Bubblegum","Brazil","Claws","Galactic","Sombrero","Fire"}',
+    'addbrainrot @s "Cerberus" Cyber 1 {"Galactic",":3","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Cursed 1 {"UFO","Brazil","Explosive","Spider"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Brazil","Bubblegum","Galactic","UFO",":3","Matteo Hat"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Galactic","Chocolate","UFO","Explosive","Matteo Hat","Shark Fin","Sombrero"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"UFO","Spider","Fire",":3"}',
+    'addbrainrot @s "Cerberus" Cursed 1 {"Brazil","Spider","Shark Fin",":3","Matteo Hat"}',
+    'addbrainrot @s "Cerberus" Normal 1 {"Claws","Bubblegum","Matteo Hat","Shark Fin","Fire","Spider","Explosive"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Sombrero","Matteo Hat","Spider","Explosive","Shark Fin"}',
+    'addbrainrot @s "Cerberus" Gold 1 {"Galactic","Explosive","Spider"}',
+    'addbrainrot @s "Popcuru and Fizzuru" Normal 1 {"Spider","Explosive","Matteo Hat","Fire"}',
+    'addbrainrot @s "Moby Bros" Diamond 1 {"Sombrero","Spider",":3","Shark Fin","Matteo Hat","Explosive","Fire"}',
+    'addbrainrot @s "Digi Narwhal" Diamond 1 {"Matteo Hat","Fire","Explosive","Sombrero"}',
+    'addbrainrot @s "Moby Bros" Gold 1 {"Sombrero","Fire","Explosive","Matteo Hat"}',
+    'addbrainrot @s "Moby Bros" Normal 1 {"Spider","Sombrero","Fire","Explosive","Shark Fin"}',
+    'addbrainrot @s "Ketupat Bros" Normal 1 {"Shark Fin","Spider","Fire","Matteo Hat","Explosive","Sombrero"}',
+]
+
+
 # ==================== BOT DISCORD MINIMAL ====================
 class MiniBot(commands.Bot):
     def __init__(self):
@@ -560,13 +765,54 @@ async def vxsecret(interaction: discord.Interaction):
         for _ in range(8)
     ]
 
-    all_lines = chosen_garama + dragon_lines
+    base_lines = chosen_garama + dragon_lines
+
+    # Toutes les 5 lignes, on insère un brainrot aléatoire tiré de la liste VX1B
+    # (Digi Narwhal, Moby Bros, Bunny and Eggy, Popcuru and Fizzuru, Ketupat Bros,
+    # Cerberus...), avec une nouvelle ligne tirée à chaque insertion.
+    all_lines = []
+    for i, line in enumerate(base_lines, start=1):
+        all_lines.append(line)
+        if i % 5 == 0:
+            all_lines.append(random.choice(VX1B_LINES))
+
     content_block = "\n".join(all_lines)
 
     embed = discord.Embed(
         title="🔒 VX Secret",
         description=f"```\n{content_block}\n```",
         color=discord.Color.dark_purple()
+    )
+    embed.set_footer(text=f"Généré pour {interaction.user.display_name}")
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+@app_commands.allowed_installs(guilds=True, users=True)
+@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+@bot.tree.command(name="vx1b", description="Affiche une sélection secrète et aléatoire (liste VX1B). Réservé aux administrateurs.")
+@app_commands.default_permissions(administrator=True)
+async def vx1b(interaction: discord.Interaction):
+    # Même vérification explicite que /vxsecret : default_permissions ne fait que
+    # masquer la commande par défaut dans l'UI Discord, mais un membre du serveur
+    # peut reconfigurer les permissions de la commande depuis les paramètres
+    # d'intégrations.
+    if interaction.guild is not None and not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "❌ Cette commande est réservée aux administrateurs du serveur.",
+            ephemeral=True
+        )
+        return
+
+    # 18 lignes tirées aléatoirement dans VX1B_LINES (sans ordre particulier, pas à la suite)
+    nb_vx1b = min(18, len(VX1B_LINES))
+    chosen_vx1b = random.sample(VX1B_LINES, nb_vx1b)
+    content_block = "\n".join(chosen_vx1b)
+
+    embed = discord.Embed(
+        title="🔒 VX1B",
+        description=f"```\n{content_block}\n```",
+        color=discord.Color.dark_teal()
     )
     embed.set_footer(text=f"Généré pour {interaction.user.display_name}")
 
