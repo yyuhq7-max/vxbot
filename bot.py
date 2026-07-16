@@ -4,9 +4,21 @@ from discord import app_commands
 import os
 import random
 import asyncio
+import logging
 import threading
+import time
 import aiohttp
+from typing import Optional
 from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# ==================== LOGGING ====================
+# Logs horodatés et bien visibles dans les logs Render (au lieu de simples print()).
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+log = logging.getLogger("brainrot-bot")
 
 # ==================== GÉNÉRATEUR "GARAMA" ALÉATOIRE ====================
 # 18 lignes tirées aléatoirement (sans ordre particulier) dans GARAMA_LINES,
@@ -725,28 +737,14 @@ VX1B_LINES = [
 
 
 # ==================== INTÉGRATION JSONBIN.IO (site de gestion des brainrots) ====================
-# Le site web de gestion (index.html) lit/écrit un bin JSONBin.io structuré ainsi :
-#   { "lists": { "vxsecret": {"label": "...", "items": [...]}, "vx1b": {...}, ... } }
-# où chaque item est {"id","name","rarity","count","mutations":[...]}.
-# Le bot rafraîchit un cache mémoire toutes les 5 minutes et fusionne ce contenu
-# avec les listes statiques codées en dur (GARAMA_LINES / VX1B_LINES) : les
-# brainrots ajoutés depuis le site apparaissent donc dans les commandes sans
-# avoir à toucher au code. Si JSONBIN_API_KEY / JSONBIN_BIN_ID ne sont pas
-# définies (ou en cas d'erreur réseau), le bot retombe simplement sur les
-# listes statiques, sans planter.
-
 JSONBIN_API_KEY = os.getenv("JSONBIN_API_KEY")
 JSONBIN_BIN_ID = os.getenv("JSONBIN_BIN_ID")
 JSONBIN_BASE_URL = "https://api.jsonbin.io/v3/b"
 
-# Cache en mémoire des brainrots ajoutés depuis le site, par commande :
-# {"vxsecret": ["addbrainrot ...", ...], "vx1b": [...], ...}
 jsonbin_cache = {}
 
 
 def format_brainrot_line(item: dict) -> str:
-    """Reconstruit une ligne 'addbrainrot ...' à partir d'un item JSON du site
-    (même format que les lignes codées en dur dans GARAMA_LINES / VX1B_LINES)."""
     name = item.get("name", "")
     rarity = item.get("rarity", "Normal")
     count = item.get("count", 1)
@@ -756,9 +754,6 @@ def format_brainrot_line(item: dict) -> str:
 
 
 async def refresh_jsonbin_cache():
-    """Récupère le contenu du bin JSONBin et met à jour le cache en mémoire.
-    Reste silencieux (juste un log) en cas d'échec : le bot retombe alors sur
-    ses listes statiques uniquement."""
     global jsonbin_cache
     if not JSONBIN_API_KEY or not JSONBIN_BIN_ID:
         return
@@ -769,17 +764,17 @@ async def refresh_jsonbin_cache():
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status != 200:
-                    print(f"⚠️ JSONBin : statut {resp.status} lors du rafraîchissement du cache.")
+                    log.warning(f"JSONBin : statut {resp.status} lors du rafraîchissement du cache.")
                     return
                 payload = await resp.json()
     except Exception as e:
-        print(f"⚠️ JSONBin : échec du rafraîchissement du cache : {e}")
+        log.warning(f"JSONBin : échec du rafraîchissement du cache : {e}")
         return
 
     record = payload.get("record", payload) if isinstance(payload, dict) else None
     lists = record.get("lists") if isinstance(record, dict) else None
     if not isinstance(lists, dict):
-        print("⚠️ JSONBin : structure inattendue dans le bin (clé 'lists' manquante).")
+        log.warning("JSONBin : structure inattendue dans le bin (clé 'lists' manquante).")
         return
 
     new_cache = {}
@@ -789,7 +784,7 @@ async def refresh_jsonbin_cache():
     jsonbin_cache = new_cache
 
     total = sum(len(v) for v in jsonbin_cache.values())
-    print(f"🔁 JSONBin : cache rafraîchi ({total} brainrot(s) ajouté(s) depuis le site, toutes commandes confondues).")
+    log.info(f"JSONBin : cache rafraîchi ({total} brainrot(s) ajouté(s) depuis le site, toutes commandes confondues).")
 
 
 @tasks.loop(minutes=5)
@@ -803,9 +798,6 @@ async def before_jsonbin_refresh_task():
 
 
 def get_pool(list_key: str, static_lines: list) -> list:
-    """Combine les lignes statiques codées en dur avec celles ajoutées
-    dynamiquement depuis le site de gestion (via JSONBin) pour la commande
-    `list_key` (ex : "vxsecret", "vx1b")."""
     return static_lines + jsonbin_cache.get(list_key, [])
 
 
@@ -816,7 +808,6 @@ class MiniBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
 
     async def setup_hook(self):
-        # Synchronisation globale des commandes slash
         await self.tree.sync()
 
 
@@ -828,11 +819,6 @@ bot = MiniBot()
 @bot.tree.command(name="vxsecret", description="Affiche une sélection secrète et aléatoire. Réservé aux administrateurs.")
 @app_commands.default_permissions(administrator=True)
 async def vxsecret(interaction: discord.Interaction):
-    # Vérification explicite en plus de default_permissions : celle-ci ne fait que
-    # masquer la commande par défaut dans l'UI Discord, mais un membre du serveur
-    # peut reconfigurer les permissions de la commande depuis les paramètres
-    # d'intégrations. Cette vérification garantit que seuls les membres ayant
-    # réellement la permission "Administrateur" peuvent l'utiliser.
     if interaction.guild is not None and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
             "❌ Cette commande est réservée aux administrateurs du serveur.",
@@ -840,13 +826,10 @@ async def vxsecret(interaction: discord.Interaction):
         )
         return
 
-    # 18 lignes "Garama and Madundung" tirées aléatoirement (liste statique fusionnée
-    # avec les éventuels brainrots ajoutés depuis le site pour la commande /vxsecret)
     garama_pool = get_pool("vxsecret", GARAMA_LINES)
     nb_garama = min(18, len(garama_pool))
     chosen_garama = random.sample(garama_pool, nb_garama)
 
-    # 8 lignes "Dragon Cannelloni" avec une rareté aléatoire (Gold ou Diamond) à chaque fois
     dragon_lines = [
         f'addbrainrot @s "Dragon Cannelloni" {random.choice(DRAGON_CANNELLONI_RARITIES)} 1'
         for _ in range(8)
@@ -854,8 +837,6 @@ async def vxsecret(interaction: discord.Interaction):
 
     base_lines = chosen_garama + dragon_lines
 
-    # Toutes les 5 lignes, on insère un brainrot aléatoire tiré du pool VX1B
-    # (liste statique fusionnée avec les brainrots ajoutés depuis le site pour /vx1b)
     vx1b_pool = get_pool("vx1b", VX1B_LINES)
     all_lines = []
     for i, line in enumerate(base_lines, start=1):
@@ -880,10 +861,6 @@ async def vxsecret(interaction: discord.Interaction):
 @bot.tree.command(name="pentinbase", description="Comme /vxsecret + Balai de Sorcière offert en tête. Réservé aux admins.")
 @app_commands.default_permissions(administrator=True)
 async def pentinbase(interaction: discord.Interaction):
-    # Même vérification explicite que /vxsecret : default_permissions ne fait que
-    # masquer la commande par défaut dans l'UI Discord, mais un membre du serveur
-    # peut reconfigurer les permissions de la commande depuis les paramètres
-    # d'intégrations.
     if interaction.guild is not None and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
             "❌ Cette commande est réservée aux administrateurs du serveur.",
@@ -891,13 +868,10 @@ async def pentinbase(interaction: discord.Interaction):
         )
         return
 
-    # 18 lignes "Garama and Madundung" tirées aléatoirement (liste statique fusionnée
-    # avec les éventuels brainrots ajoutés depuis le site pour la commande /vxsecret)
     garama_pool = get_pool("vxsecret", GARAMA_LINES)
     nb_garama = min(18, len(garama_pool))
     chosen_garama = random.sample(garama_pool, nb_garama)
 
-    # 8 lignes "Dragon Cannelloni" avec une rareté aléatoire (Gold ou Diamond) à chaque fois
     dragon_lines = [
         f'addbrainrot @s "Dragon Cannelloni" {random.choice(DRAGON_CANNELLONI_RARITIES)} 1'
         for _ in range(8)
@@ -905,8 +879,6 @@ async def pentinbase(interaction: discord.Interaction):
 
     base_lines = chosen_garama + dragon_lines
 
-    # Toutes les 5 lignes, on insère un brainrot aléatoire tiré du pool VX1B
-    # (liste statique fusionnée avec les brainrots ajoutés depuis le site pour /vx1b)
     vx1b_pool = get_pool("vx1b", VX1B_LINES)
     all_lines = []
     for i, line in enumerate(base_lines, start=1):
@@ -914,7 +886,6 @@ async def pentinbase(interaction: discord.Interaction):
         if i % 5 == 0:
             all_lines.append(random.choice(vx1b_pool))
 
-    # Ligne offerte, toujours en toute première position
     all_lines = ['giveitem @s "Witch\'s Broom"'] + all_lines
 
     content_block = "\n".join(all_lines)
@@ -934,10 +905,6 @@ async def pentinbase(interaction: discord.Interaction):
 @bot.tree.command(name="vx1b", description="Affiche une sélection secrète et aléatoire (liste VX1B). Réservé aux administrateurs.")
 @app_commands.default_permissions(administrator=True)
 async def vx1b(interaction: discord.Interaction):
-    # Même vérification explicite que /vxsecret : default_permissions ne fait que
-    # masquer la commande par défaut dans l'UI Discord, mais un membre du serveur
-    # peut reconfigurer les permissions de la commande depuis les paramètres
-    # d'intégrations.
     if interaction.guild is not None and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
             "❌ Cette commande est réservée aux administrateurs du serveur.",
@@ -945,9 +912,6 @@ async def vx1b(interaction: discord.Interaction):
         )
         return
 
-    # 18 lignes tirées aléatoirement (sans ordre particulier, pas à la suite) dans le
-    # pool VX1B : liste statique fusionnée avec les brainrots ajoutés depuis le site
-    # pour la commande /vx1b
     vx1b_pool = get_pool("vx1b", VX1B_LINES)
     nb_vx1b = min(18, len(vx1b_pool))
     chosen_vx1b = random.sample(vx1b_pool, nb_vx1b)
@@ -963,18 +927,11 @@ async def vx1b(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-# ==================== COMMANDE GÉNÉRIQUE /vxlist ====================
-# Toute nouvelle "commande" créée depuis le site de gestion (autre que vxsecret
-# et vx1b, qui ont leur propre commande dédiée ci-dessus) est automatiquement
-# jouable via /vxlist, sans avoir besoin de modifier le code du bot à chaque
-# création de liste. Le nom de la liste est proposé par autocomplétion à
-# partir du cache JSONBin.
-
 async def vxlist_name_autocomplete(interaction: discord.Interaction, current: str):
     choices = []
     for key in jsonbin_cache.keys():
         if key in ("vxsecret", "vx1b"):
-            continue  # ces deux-là ont déjà leur propre commande dédiée
+            continue
         if current.lower() in key.lower():
             choices.append(app_commands.Choice(name=f"/{key}", value=key))
     return choices[:25]
@@ -1018,27 +975,59 @@ async def vxlist(interaction: discord.Interaction, liste: str):
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-# ==================== SYSTÈME ANTI-VEILLE POUR RENDER (Free Web Service) ====================
+# ==================== SYSTÈME ANTI-VEILLE POUR RENDER (Free Web Service) — RENFORCÉ ====================
 # Render met en veille les Web Services gratuits après ~15 minutes sans requête
-# HTTP entrante. On contourne ça de deux façons complémentaires :
-#  1) un petit serveur HTTP qui répond "Bot Discord actif !" (nécessaire pour
-#     que Render considère le service comme un vrai Web Service qui écoute) ;
-#  2) une tâche de fond qui s'auto-ping toutes les 10 minutes sur sa propre
-#     URL publique (RENDER_EXTERNAL_URL, fournie automatiquement par Render).
+# HTTP entrante. Version renforcée par rapport à la précédente :
+#   1) Le serveur HTTP keep-alive répond toujours (nécessaire pour que Render
+#      considère le service comme un vrai Web Service actif).
+#   2) La tâche self_ping s'exécute toutes les 4 minutes (au lieu de 10) —
+#      marge de sécurité large sous le seuil de 15 min de Render — avec
+#      plusieurs tentatives (retries) et une session HTTP réutilisée.
+#   3) Le bot Discord lui-même est enveloppé dans une boucle de redémarrage
+#      automatique : si `bot.run()` plante (perte réseau, erreur Discord,
+#      exception non gérée...), il est relancé automatiquement après une
+#      courte pause, au lieu de laisser le process s'arrêter définitivement.
+#
+# ⚠️ Important : ce système ne peut rien faire si Render tue carrément le
+# process (ex. dépassement du quota gratuit de 750h/mois, ou "Manual/Auto
+# Deploy" qui redémarre le service). Dans ce cas Render doit relancer lui-même
+# le service. En complément de ce code, il est recommandé d'ajouter un
+# ping externe (UptimeRobot, cron-job.org, etc.) toutes les 5 minutes vers
+# ton URL Render : ça donne une deuxième source de trafic entrant en plus du
+# self-ping, ce qui rend la mise en veille quasiment impossible.
 
 RENDER_EXTERNAL_URL = os.getenv("RENDER_EXTERNAL_URL")
 
+# Session HTTP persistante pour le self-ping (évite de recréer une connexion
+# TCP/TLS à chaque tentative, plus rapide et plus fiable).
+_ping_session: Optional[aiohttp.ClientSession] = None
 
-@tasks.loop(minutes=10)
+
+async def _get_ping_session() -> aiohttp.ClientSession:
+    global _ping_session
+    if _ping_session is None or _ping_session.closed:
+        _ping_session = aiohttp.ClientSession()
+    return _ping_session
+
+
+@tasks.loop(minutes=4)
 async def self_ping():
     if not RENDER_EXTERNAL_URL:
         return
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(RENDER_EXTERNAL_URL, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                print(f"🔁 Self-ping effectué avec succès (statut {resp.status})")
-    except Exception as e:
-        print(f"⚠️ Self-ping échoué : {e}")
+
+    session = await _get_ping_session()
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        try:
+            async with session.get(RENDER_EXTERNAL_URL, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                log.info(f"🔁 Self-ping OK (statut {resp.status}, tentative {attempt})")
+                return
+        except Exception as e:
+            log.warning(f"⚠️ Self-ping échoué (tentative {attempt}/{max_attempts}) : {e}")
+            if attempt < max_attempts:
+                await asyncio.sleep(5)
+
+    log.error("❌ Self-ping : toutes les tentatives ont échoué ce cycle.")
 
 
 @self_ping.before_loop
@@ -1046,20 +1035,34 @@ async def before_self_ping():
     await bot.wait_until_ready()
 
 
+@self_ping.error
+async def self_ping_error(error):
+    # Empêche la tâche périodique de s'arrêter définitivement si une exception
+    # inattendue remonte : on log et on laisse discord.py.tasks la relancer.
+    log.error(f"❌ Erreur non gérée dans self_ping : {error}")
+
+
+@bot.event
+async def on_disconnect():
+    log.warning("🔌 Déconnecté de Discord (tentative de reconnexion automatique en cours)...")
+
+
+@bot.event
+async def on_resumed():
+    log.info("✅ Session Discord reprise avec succès après une coupure.")
+
+
 @bot.event
 async def on_ready():
-    print(f"✅ Bot connecté avec succès en tant que {bot.user.name}")
+    log.info(f"✅ Bot connecté avec succès en tant que {bot.user.name}")
     if not self_ping.is_running():
         self_ping.start()
 
-    # Premier chargement immédiat du cache JSONBin (sans attendre les 5 minutes
-    # de la tâche périodique), pour que les brainrots déjà ajoutés depuis le site
-    # soient disponibles dès le démarrage.
     await refresh_jsonbin_cache()
     if not jsonbin_refresh_task.is_running():
         jsonbin_refresh_task.start()
 
-    print("Prêt et synchronisé !")
+    log.info("Prêt et synchronisé !")
 
 
 class KeepAliveHandler(BaseHTTPRequestHandler):
@@ -1069,21 +1072,67 @@ class KeepAliveHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"Bot Discord actif !")
 
+    def do_HEAD(self):
+        # Certains services de ping externes (UptimeRobot, cron-job.org en mode
+        # HEAD) utilisent HEAD plutôt que GET : on répond aussi 200 ici.
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+
     def log_message(self, format, *args):
-        # Empêche de spammer les logs Render à chaque ping
         pass
 
 
 def run_keep_alive_server():
     port = int(os.getenv("PORT", 8080))
-    server = HTTPServer(("0.0.0.0", port), KeepAliveHandler)
-    print(f"🌐 Serveur keep-alive lancé sur le port {port}")
-    server.serve_forever()
+    while True:
+        try:
+            server = HTTPServer(("0.0.0.0", port), KeepAliveHandler)
+            log.info(f"🌐 Serveur keep-alive lancé sur le port {port}")
+            server.serve_forever()
+        except Exception as e:
+            # Si le petit serveur HTTP plante pour une raison quelconque, on le
+            # relance après une courte pause plutôt que de laisser le thread mourir.
+            log.error(f"⚠️ Serveur keep-alive interrompu ({e}), redémarrage dans 5s...")
+            time.sleep(5)
 
 
 def start_keep_alive():
     thread = threading.Thread(target=run_keep_alive_server, daemon=True)
     thread.start()
+
+
+def run_bot_forever(token: str):
+    """Lance le bot Discord avec redémarrage automatique en cas de plantage
+    (erreur réseau, exception non gérée, perte de connexion Discord...).
+    Une pause croissante (backoff) évite de spammer Discord/Render en cas
+    d'échecs répétés."""
+    backoff = 5  # secondes, avant la première tentative de reconnexion
+    max_backoff = 300  # 5 minutes max entre deux tentatives
+
+    while True:
+        try:
+            log.info("🚀 Démarrage du bot Discord...")
+            bot.run(token, log_handler=None)
+            # bot.run() ne revient normalement que si le bot s'est arrêté
+            # proprement (ex. bot.close()). On considère ça comme un arrêt
+            # volontaire et on sort de la boucle.
+            log.info("ℹ️ bot.run() s'est terminé normalement, arrêt du superviseur.")
+            break
+        except discord.errors.LoginFailure:
+            # Token invalide : inutile de boucler indéfiniment.
+            log.critical("❌ Échec de connexion : DISCORD_TOKEN invalide. Arrêt du bot.")
+            raise
+        except Exception as e:
+            log.error(f"💥 Le bot a planté ({type(e).__name__}: {e}). "
+                      f"Redémarrage automatique dans {backoff}s...")
+            time.sleep(backoff)
+            backoff = min(backoff * 2, max_backoff)
+            continue
+
+        # Si on arrive ici après un run() propre sans exception, on réinitialise
+        # le backoff au cas où on redémarrerait plus tard pour une autre raison.
+        backoff = 5
 
 
 # --- Démarrage du bot ---
@@ -1093,4 +1142,4 @@ if __name__ == "__main__":
         raise RuntimeError("La variable d'environnement DISCORD_TOKEN n'est pas définie.")
 
     start_keep_alive()  # Lance le petit serveur HTTP en parallèle pour rester actif sur Render
-    bot.run(TOKEN)
+    run_bot_forever(TOKEN)  # Lance le bot avec redémarrage automatique en cas de plantage
