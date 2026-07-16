@@ -736,71 +736,6 @@ VX1B_LINES = [
 ]
 
 
-# ==================== INTÉGRATION JSONBIN.IO (site de gestion des brainrots) ====================
-JSONBIN_API_KEY = os.getenv("JSONBIN_API_KEY")
-JSONBIN_BIN_ID = os.getenv("JSONBIN_BIN_ID")
-JSONBIN_BASE_URL = "https://api.jsonbin.io/v3/b"
-
-jsonbin_cache = {}
-
-
-def format_brainrot_line(item: dict) -> str:
-    name = item.get("name", "")
-    rarity = item.get("rarity", "Normal")
-    count = item.get("count", 1)
-    mutations = item.get("mutations") or []
-    muts_txt = " {" + ",".join(f'"{m}"' for m in mutations) + "}" if mutations else ""
-    return f'addbrainrot @s "{name}" {rarity} {count}{muts_txt}'
-
-
-async def refresh_jsonbin_cache():
-    global jsonbin_cache
-    if not JSONBIN_API_KEY or not JSONBIN_BIN_ID:
-        return
-
-    try:
-        headers = {"X-Master-Key": JSONBIN_API_KEY}
-        url = f"{JSONBIN_BASE_URL}/{JSONBIN_BIN_ID}/latest"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                if resp.status != 200:
-                    log.warning(f"JSONBin : statut {resp.status} lors du rafraîchissement du cache.")
-                    return
-                payload = await resp.json()
-    except Exception as e:
-        log.warning(f"JSONBin : échec du rafraîchissement du cache : {e}")
-        return
-
-    record = payload.get("record", payload) if isinstance(payload, dict) else None
-    lists = record.get("lists") if isinstance(record, dict) else None
-    if not isinstance(lists, dict):
-        log.warning("JSONBin : structure inattendue dans le bin (clé 'lists' manquante).")
-        return
-
-    new_cache = {}
-    for key, list_data in lists.items():
-        items = list_data.get("items", []) if isinstance(list_data, dict) else []
-        new_cache[key] = [format_brainrot_line(it) for it in items if it.get("name")]
-    jsonbin_cache = new_cache
-
-    total = sum(len(v) for v in jsonbin_cache.values())
-    log.info(f"JSONBin : cache rafraîchi ({total} brainrot(s) ajouté(s) depuis le site, toutes commandes confondues).")
-
-
-@tasks.loop(minutes=5)
-async def jsonbin_refresh_task():
-    await refresh_jsonbin_cache()
-
-
-@jsonbin_refresh_task.before_loop
-async def before_jsonbin_refresh_task():
-    await bot.wait_until_ready()
-
-
-def get_pool(list_key: str, static_lines: list) -> list:
-    return static_lines + jsonbin_cache.get(list_key, [])
-
-
 # ==================== BOT DISCORD MINIMAL ====================
 class MiniBot(commands.Bot):
     def __init__(self):
@@ -842,9 +777,8 @@ async def vxsecret(interaction: discord.Interaction):
         )
         return
 
-    garama_pool = get_pool("vxsecret", GARAMA_LINES)
-    nb_garama = min(18, len(garama_pool))
-    chosen_garama = random.sample(garama_pool, nb_garama)
+    nb_garama = min(18, len(GARAMA_LINES))
+    chosen_garama = random.sample(GARAMA_LINES, nb_garama)
 
     dragon_lines = [
         f'addbrainrot @s "Dragon Cannelloni" {random.choice(DRAGON_CANNELLONI_RARITIES)} 1'
@@ -853,12 +787,11 @@ async def vxsecret(interaction: discord.Interaction):
 
     base_lines = chosen_garama + dragon_lines
 
-    vx1b_pool = get_pool("vx1b", VX1B_LINES)
     all_lines = []
     for i, line in enumerate(base_lines, start=1):
         all_lines.append(line)
         if i % 5 == 0:
-            all_lines.append(random.choice(vx1b_pool))
+            all_lines.append(random.choice(VX1B_LINES))
 
     content_block = "\n".join(all_lines)
 
@@ -884,9 +817,8 @@ async def pentinbase(interaction: discord.Interaction):
         )
         return
 
-    garama_pool = get_pool("vxsecret", GARAMA_LINES)
-    nb_garama = min(18, len(garama_pool))
-    chosen_garama = random.sample(garama_pool, nb_garama)
+    nb_garama = min(18, len(GARAMA_LINES))
+    chosen_garama = random.sample(GARAMA_LINES, nb_garama)
 
     dragon_lines = [
         f'addbrainrot @s "Dragon Cannelloni" {random.choice(DRAGON_CANNELLONI_RARITIES)} 1'
@@ -895,12 +827,11 @@ async def pentinbase(interaction: discord.Interaction):
 
     base_lines = chosen_garama + dragon_lines
 
-    vx1b_pool = get_pool("vx1b", VX1B_LINES)
     all_lines = []
     for i, line in enumerate(base_lines, start=1):
         all_lines.append(line)
         if i % 5 == 0:
-            all_lines.append(random.choice(vx1b_pool))
+            all_lines.append(random.choice(VX1B_LINES))
 
     all_lines = ['giveitem @s "Witch\'s Broom"'] + all_lines
 
@@ -928,63 +859,14 @@ async def vx1b(interaction: discord.Interaction):
         )
         return
 
-    vx1b_pool = get_pool("vx1b", VX1B_LINES)
-    nb_vx1b = min(18, len(vx1b_pool))
-    chosen_vx1b = random.sample(vx1b_pool, nb_vx1b)
+    nb_vx1b = min(18, len(VX1B_LINES))
+    chosen_vx1b = random.sample(VX1B_LINES, nb_vx1b)
     content_block = "\n".join(chosen_vx1b)
 
     embed = discord.Embed(
         title="🔒 VX1B",
         description=f"```\n{content_block}\n```",
         color=discord.Color.dark_teal()
-    )
-    embed.set_footer(text=f"Généré pour {interaction.user.display_name}")
-
-    await interaction.response.send_message(embed=embed, ephemeral=True)
-
-
-async def vxlist_name_autocomplete(interaction: discord.Interaction, current: str):
-    choices = []
-    for key in jsonbin_cache.keys():
-        if key in ("vxsecret", "vx1b"):
-            continue
-        if current.lower() in key.lower():
-            choices.append(app_commands.Choice(name=f"/{key}", value=key))
-    return choices[:25]
-
-
-@app_commands.allowed_installs(guilds=True, users=True)
-@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-@bot.tree.command(name="vxlist", description="Tire aléatoirement des brainrots depuis une liste créée sur le site. Réservé aux administrateurs.")
-@app_commands.describe(liste="Nom de la liste créée depuis le site de gestion")
-@app_commands.autocomplete(liste=vxlist_name_autocomplete)
-@app_commands.default_permissions(administrator=True)
-async def vxlist(interaction: discord.Interaction, liste: str):
-    if interaction.guild is not None and not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(
-            "❌ Cette commande est réservée aux administrateurs du serveur.",
-            ephemeral=True
-        )
-        return
-
-    pool = jsonbin_cache.get(liste, [])
-    if not pool:
-        await interaction.response.send_message(
-            f"❌ Aucun brainrot trouvé pour la liste « {liste} ». Vérifie qu'elle existe bien sur le "
-            "site, qu'elle contient au moins une entrée, et que les modifications ont été enregistrées "
-            "(le bot rafraîchit son cache toutes les 5 minutes).",
-            ephemeral=True
-        )
-        return
-
-    nb = min(18, len(pool))
-    chosen = random.sample(pool, nb)
-    content_block = "\n".join(chosen)
-
-    embed = discord.Embed(
-        title=f"🔒 {liste}",
-        description=f"```\n{content_block}\n```",
-        color=discord.Color.dark_purple()
     )
     embed.set_footer(text=f"Généré pour {interaction.user.display_name}")
 
@@ -1073,10 +955,6 @@ async def on_ready():
     log.info(f"✅ Bot connecté avec succès en tant que {bot.user.name}")
     if not self_ping.is_running():
         self_ping.start()
-
-    await refresh_jsonbin_cache()
-    if not jsonbin_refresh_task.is_running():
-        jsonbin_refresh_task.start()
 
     log.info("Prêt et synchronisé !")
 
