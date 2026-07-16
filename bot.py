@@ -808,7 +808,23 @@ class MiniBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
 
     async def setup_hook(self):
-        await self.tree.sync()
+        # Synchronisation des commandes slash. Isolée dans un try/except :
+        # un échec ici (ex: 429 rate limit Discord) ne doit jamais empêcher
+        # le bot de démarrer et de rester connecté — les commandes existantes
+        # resteront simplement inchangées jusqu'au prochain sync réussi,
+        # plutôt que de faire planter tout le process.
+        try:
+            await self.tree.sync()
+            log.info("✅ Commandes slash synchronisées avec succès.")
+        except discord.errors.HTTPException as e:
+            if e.status == 429:
+                log.warning(
+                    "⚠️ Rate limit Discord (429) lors de la synchronisation des commandes "
+                    "slash. Le bot démarre quand même normalement ; la sync sera "
+                    "retentée automatiquement au prochain redémarrage."
+                )
+            else:
+                log.warning(f"⚠️ Échec de la synchronisation des commandes slash : {e}")
 
 
 bot = MiniBot()
@@ -1107,8 +1123,8 @@ def run_bot_forever(token: str):
     (erreur réseau, exception non gérée, perte de connexion Discord...).
     Une pause croissante (backoff) évite de spammer Discord/Render en cas
     d'échecs répétés."""
-    backoff = 5  # secondes, avant la première tentative de reconnexion
-    max_backoff = 300  # 5 minutes max entre deux tentatives
+    backoff = 15  # secondes, avant la première tentative de reconnexion
+    max_backoff = 600  # 10 minutes max entre deux tentatives
 
     while True:
         try:
@@ -1123,6 +1139,25 @@ def run_bot_forever(token: str):
             # Token invalide : inutile de boucler indéfiniment.
             log.critical("❌ Échec de connexion : DISCORD_TOKEN invalide. Arrêt du bot.")
             raise
+        except discord.errors.HTTPException as e:
+            if e.status == 429:
+                # Rate limit global Discord : il ne faut surtout PAS réessayer
+                # rapidement, sous peine d'aggraver le blocage. On attend une
+                # pause longue et fixe (2 minutes minimum), indépendante du
+                # backoff normal.
+                wait_time = max(120, backoff)
+                log.error(
+                    f"🚫 Rate limit Discord (429) reçu : "
+                    f"{getattr(e, 'text', str(e))}. Attente de {wait_time}s avant de réessayer."
+                )
+                time.sleep(wait_time)
+                backoff = min(backoff * 2, max_backoff)
+            else:
+                log.error(f"💥 Erreur HTTP Discord ({e.status}): {e}. "
+                          f"Redémarrage automatique dans {backoff}s...")
+                time.sleep(backoff)
+                backoff = min(backoff * 2, max_backoff)
+            continue
         except Exception as e:
             log.error(f"💥 Le bot a planté ({type(e).__name__}: {e}). "
                       f"Redémarrage automatique dans {backoff}s...")
@@ -1132,7 +1167,7 @@ def run_bot_forever(token: str):
 
         # Si on arrive ici après un run() propre sans exception, on réinitialise
         # le backoff au cas où on redémarrerait plus tard pour une autre raison.
-        backoff = 5
+        backoff = 15
 
 
 # --- Démarrage du bot ---
